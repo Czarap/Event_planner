@@ -16,7 +16,6 @@ db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
-
 class Venue(db.Model):
     __tablename__ = 'venues'
     Venue_ID = db.Column(db.Integer, primary_key=True)
@@ -56,3 +55,92 @@ class Event(db.Model):
     Number_of_Participants = db.Column(db.Integer)
     Event_Duration = db.Column(db.Integer)
     Potential_Cost = db.Column(db.Numeric(10, 2))
+
+
+@app.before_first_request
+def create_tables():
+    db.create_all()
+
+
+@app.route('/events', methods=['GET', 'POST'])
+@jwt_required()
+def handle_events():
+    if request.method == 'GET':
+        events = Event.query.all()
+        return jsonify([{
+            'Event_ID': event.Event_ID,
+            'Event_Name': event.Event_Name,
+            'Event_Start_Date': event.Event_Start_Date.strftime('%Y-%m-%d'),
+            'Event_End_Date': event.Event_End_Date.strftime('%Y-%m-%d'),
+            'Number_of_Participants': event.Number_of_Participants,
+            'Event_Duration': event.Event_Duration,
+            'Potential_Cost': str(event.Potential_Cost)
+        } for event in events]), 200
+
+    elif request.method == 'POST':
+        data = request.json
+        new_event = Event(
+            Event_Status_Code=data['Event_Status_Code'],
+            Event_Type_Code=data['Event_Type_Code'],
+            Organizer_ID=data['Organizer_ID'],
+            Venue_ID=data['Venue_ID'],
+            Event_Name=data['Event_Name'],
+            Event_Start_Date=datetime.datetime.strptime(data['Event_Start_Date'], '%Y-%m-%d').date(),
+            Event_End_Date=datetime.datetime.strptime(data['Event_End_Date'], '%Y-%m-%d').date(),
+            Number_of_Participants=data['Number_of_Participants'],
+            Event_Duration=data['Event_Duration'],
+            Potential_Cost=data['Potential_Cost']
+        )
+        db.session.add(new_event)
+        db.session.commit()
+        return jsonify({'message': 'Event created successfully!'}), 201
+
+@app.route('/events/<int:event_id>', methods=['GET', 'PUT', 'DELETE'])
+@jwt_required()
+def handle_event(event_id):
+    event = Event.query.get_or_404(event_id)
+
+    if request.method == 'GET':
+        return jsonify({
+            'Event_ID': event.Event_ID,
+            'Event_Name': event.Event_Name,
+            'Event_Start_Date': event.Event_Start_Date.strftime('%Y-%m-%d'),
+            'Event_End_Date': event.Event_End_Date.strftime('%Y-%m-%d'),
+            'Number_of_Participants': event.Number_of_Participants,
+            'Event_Duration': event.Event_Duration,
+            'Potential_Cost': str(event.Potential_Cost)
+        }), 200
+
+    elif request.method == 'PUT':
+        data = request.json
+        event.Event_Status_Code = data.get('Event_Status_Code', event.Event_Status_Code)
+        event.Event_Type_Code = data.get('Event_Type_Code', event.Event_Type_Code)
+        event.Organizer_ID = data.get('Organizer_ID', event.Organizer_ID)
+        event.Venue_ID = data.get('Venue_ID', event.Venue_ID)
+        event.Event_Name = data.get('Event_Name', event.Event_Name)
+        event.Event_Start_Date = datetime.datetime.strptime(data['Event_Start_Date'], '%Y-%m-%d').date()
+        event.Event_End_Date = datetime.datetime.strptime(data['Event_End_Date'], '%Y-%m-%d').date()
+        event.Number_of_Participants = data.get('Number_of_Participants', event.Number_of_Participants)
+        event.Event_Duration = data.get('Event_Duration', event.Event_Duration)
+        event.Potential_Cost = data.get('Potential_Cost', event.Potential_Cost)
+        db.session.commit()
+        return jsonify({'message': 'Event updated successfully!'}), 200
+
+    elif request.method == 'DELETE':
+        db.session.delete(event)
+        db.session.commit()
+        return jsonify({'message': 'Event deleted successfully!'}), 200
+
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data['email']
+
+    if email == 'admin@gmail.com' and data['password'] == 'password':
+        token = create_access_token(identity=email)
+        return jsonify({'token': token}), 200
+    return jsonify({'message': 'Invalid credentials'}), 401
+
+if __name__ == '__main__':
+    app.run(debug=True)
