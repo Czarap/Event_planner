@@ -31,7 +31,7 @@ CREATE TABLE Venues (
     Venue_Name VARCHAR(255),
     Other_Details TEXT
 );
-
+Select * From  Events;
 CREATE TABLE Events (
     Event_ID INT PRIMARY KEY,
     Event_Status_Code INT,
@@ -42,7 +42,7 @@ CREATE TABLE Events (
     Event_Start_Date DATE,
     Event_End_Date DATE,
     Number_of_Participants INT,
-    Event_Duration INT,
+    Event_Duration VARCHAR(255),
     Potential_Cost DECIMAL(10, 2),
     FOREIGN KEY (Event_Status_Code) REFERENCES Ref_Event_Status(Event_Status_Code),
     FOREIGN KEY (Event_Type_Code) REFERENCES Ref_Event_Types(Event_Type_Code),
@@ -50,20 +50,14 @@ CREATE TABLE Events (
     FOREIGN KEY (Venue_ID) REFERENCES Venues(Venue_ID)
 );
 
+-- join to py --
 SELECT 
     e.Event_ID,
     e.Event_Name,
     e.Event_Start_Date,
     e.Event_End_Date,
     e.Number_of_Participants,
-    CASE
-        WHEN r.Event_Status_Description = 'Scheduled' THEN 'Scheduled'
-        WHEN r.Event_Status_Description = 'Ongoing' THEN 'Ongoing'
-        WHEN r.Event_Status_Description = 'Completed' THEN 'Completed'
-        WHEN r.Event_Status_Description = 'Cancelled' THEN 'Cancelled'
-        WHEN r.Event_Status_Description = 'Postponed' THEN 'Postponed'
-        ELSE CAST(e.Event_Duration AS CHAR) 
-    END AS Event_Duration,
+    r.Event_Status_Description AS Event_Duration, 
     e.Potential_Cost
 FROM 
     Events e
