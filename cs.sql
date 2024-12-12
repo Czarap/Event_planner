@@ -11,6 +11,22 @@ CREATE TABLE Organizers (
     Mobile_Number VARCHAR(20)
 );
 
+CREATE TABLE Ref_Event_Status (
+    Event_Status_Code INT PRIMARY KEY,
+    Event_Status_Description VARCHAR(255)
+);
+
+CREATE TABLE Ref_Event_Types (
+    Event_Type_Code INT PRIMARY KEY,
+    Event_Type_Description VARCHAR(255)
+);
+
+CREATE TABLE Venues (
+    Venue_ID INT PRIMARY KEY,
+    Venue_Name VARCHAR(255),
+    Other_Details TEXT
+);
+
 CREATE TABLE Events (
     Event_ID INT PRIMARY KEY,
     Event_Status_Code INT,
@@ -27,22 +43,6 @@ CREATE TABLE Events (
     FOREIGN KEY (Event_Type_Code) REFERENCES Ref_Event_Types(Event_Type_Code),
     FOREIGN KEY (Organizer_ID) REFERENCES Organizers(Organizer_ID),
     FOREIGN KEY (Venue_ID) REFERENCES Venues(Venue_ID)
-);
-
-CREATE TABLE Ref_Event_Status (
-    Event_Status_Code INT PRIMARY KEY,
-    Event_Status_Description VARCHAR(255)
-);
-
-CREATE TABLE Ref_Event_Types (
-    Event_Type_Code INT PRIMARY KEY,
-    Event_Type_Description VARCHAR(255)
-);
-
-CREATE TABLE Venues (
-    Venue_ID INT PRIMARY KEY,
-    Venue_Name VARCHAR(255),
-    Other_Details TEXT
 );
 
 INSERT INTO Organizers (Organizer_ID, Name, Email_Address, Contact_ID, Address_ID, Web_Site_Address, Mobile_Number) VALUES
@@ -72,14 +72,12 @@ INSERT INTO Organizers (Organizer_ID, Name, Email_Address, Contact_ID, Address_I
 (24, 'Organizer Twenty-Four', 'org24@example.com', 124, 224, 'www.org24.com', '1234567813'),
 (25, 'Organizer Twenty-Five', 'org25@example.com', 125, 225, 'www.org25.com', '1234567814');
 
-
 INSERT INTO Ref_Event_Status (Event_Status_Code, Event_Status_Description) VALUES
 (1, 'Scheduled'),
 (2, 'Ongoing'),
 (3, 'Completed'),
 (4, 'Cancelled'),
 (5, 'Postponed');
-
 
 INSERT INTO Ref_Event_Types (Event_Type_Code, Event_Type_Description) VALUES
 (1, 'Conference'),
@@ -108,7 +106,6 @@ INSERT INTO Ref_Event_Types (Event_Type_Code, Event_Type_Description) VALUES
 (24, 'Quiz Contest'),
 (25, 'Debate Competition');
 
-
 INSERT INTO Venues (Venue_ID, Venue_Name, Other_Details) VALUES
 (1, 'Venue A', 'Located downtown with capacity of 500'),
 (2, 'Venue B', 'Located uptown with capacity of 300'),
@@ -135,7 +132,6 @@ INSERT INTO Venues (Venue_ID, Venue_Name, Other_Details) VALUES
 (23, 'Venue W', 'Airport hangar converted for events'),
 (24, 'Venue X', 'Library conference room with 100 capacity'),
 (25, 'Venue Y', 'Casino event room with 500 capacity');
-
 
 INSERT INTO Events (Event_ID, Event_Status_Code, Event_Type_Code, Organizer_ID, Venue_ID, Event_Name, Event_Start_Date, Event_End_Date, Number_of_Participants, Event_Duration, Potential_Cost) VALUES
 (1, 1, 1, 1, 1, 'Tech Conference 2024', '2024-01-15', '2024-01-17', 500, 3, 25000.00),
