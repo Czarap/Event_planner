@@ -52,6 +52,25 @@ CREATE TABLE Events (
     FOREIGN KEY (Venue_ID) REFERENCES Venues(Venue_ID)
 );
 
+SELECT 
+    e.Event_ID,
+    e.Event_Name,
+    e.Event_Start_Date,
+    e.Event_End_Date,
+    e.Number_of_Participants,
+    e.Event_Duration,
+    e.Potential_Cost,
+    r.Event_Status_Description AS Event_Status
+FROM 
+    Events e
+JOIN 
+    Ref_Event_Status r
+ON 
+    e.Event_Status_Code = r.Event_Status_Code
+WHERE 
+    r.Event_Status_Description IN ('Scheduled', 'Ongoing','Completed','Cancelled','Postponed');
+
+
 INSERT INTO Organizers (Organizer_ID, Name, Email_Address, Contact_ID, Address_ID, Web_Site_Address, Mobile_Number) VALUES
 (1, 'Organizer One', 'org1@example.com', 101, 201, 'www.org1.com', '1234567890'),
 (2, 'Organizer Two', 'org2@example.com', 102, 202, 'www.org2.com', '1234567891'),
