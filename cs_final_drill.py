@@ -7,10 +7,10 @@ import datetime
 app = Flask(__name__)
 
 
-
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:password@localhost:3306/cs.sql'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:YES@localhost:3306/cs'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'czar'  
+
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -56,9 +56,7 @@ class Event(db.Model):
     Event_Duration = db.Column(db.Integer)
     Potential_Cost = db.Column(db.Numeric(10, 2))
 
-
-@app.before_first_request
-def create_tables():
+with app.app_context():
     db.create_all()
 
 
