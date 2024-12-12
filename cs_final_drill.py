@@ -69,7 +69,7 @@ def handle_events():
             Event.Potential_Cost
         ).join(
             RefEventStatus, Event.Event_Status_Code == RefEventStatus.Event_Status_Code
-        ).all()
+        ).order_by(Event.Event_ID.asc()).all()
 
         return jsonify([{
             'Event_ID': event.Event_ID,
