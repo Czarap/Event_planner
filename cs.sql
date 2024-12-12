@@ -6,8 +6,6 @@ ALTER USER 'username'@'localhost' IDENTIFIED BY 'YES';
 GRANT ALL PRIVILEGES ON cs.* TO 'username'@'localhost';
 FLUSH PRIVILEGES;
 
-GRANT ALL PRIVILEGES ON actual_database.* TO 'actual_username'@'localhost';
-FLUSH PRIVILEGES;
 CREATE TABLE Organizers (
     Organizer_ID INT PRIMARY KEY,
     Name VARCHAR(255),
@@ -58,17 +56,21 @@ SELECT
     e.Event_Start_Date,
     e.Event_End_Date,
     e.Number_of_Participants,
-    e.Event_Duration,
-    e.Potential_Cost,
-    r.Event_Status_Description AS Event_Status
+    CASE
+        WHEN r.Event_Status_Description = 'Scheduled' THEN 'Scheduled'
+        WHEN r.Event_Status_Description = 'Ongoing' THEN 'Ongoing'
+        WHEN r.Event_Status_Description = 'Completed' THEN 'Completed'
+        WHEN r.Event_Status_Description = 'Cancelled' THEN 'Cancelled'
+        WHEN r.Event_Status_Description = 'Postponed' THEN 'Postponed'
+        ELSE CAST(e.Event_Duration AS CHAR) 
+    END AS Event_Duration,
+    e.Potential_Cost
 FROM 
     Events e
 JOIN 
     Ref_Event_Status r
 ON 
-    e.Event_Status_Code = r.Event_Status_Code
-WHERE 
-    r.Event_Status_Description IN ('Scheduled', 'Ongoing','Completed','Cancelled','Postponed');
+    e.Event_Status_Code = r.Event_Status_Code;
 
 
 INSERT INTO Organizers (Organizer_ID, Name, Email_Address, Contact_ID, Address_ID, Web_Site_Address, Mobile_Number) VALUES
