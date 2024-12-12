@@ -1,19 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 import datetime
 
 app = Flask(__name__)
 
-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:YES@localhost:3306/cs'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'czar'  
 
-
 db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
 class Venue(db.Model):
@@ -59,12 +55,22 @@ class Event(db.Model):
 with app.app_context():
     db.create_all()
 
-
 @app.route('/events', methods=['GET', 'POST'])
 @jwt_required()
 def handle_events():
     if request.method == 'GET':
-        events = Event.query.all()
+        events = db.session.query(
+            Event.Event_ID,
+            Event.Event_Name,
+            Event.Event_Start_Date,
+            Event.Event_End_Date,
+            Event.Number_of_Participants,
+            RefEventStatus.Event_Status_Description.label('Event_Duration'),
+            Event.Potential_Cost
+        ).join(
+            RefEventStatus, Event.Event_Status_Code == RefEventStatus.Event_Status_Code
+        ).all()
+
         return jsonify([{
             'Event_ID': event.Event_ID,
             'Event_Name': event.Event_Name,
@@ -129,14 +135,17 @@ def handle_event(event_id):
         db.session.commit()
         return jsonify({'message': 'Event deleted successfully!'}), 200
 
-
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
     email = data['email']
 
     if email == 'admin@gmail.com' and data['password'] == 'password':
-        token = create_access_token(identity=email)
+        token = create_access_token(
+            identity=email,
+            additional_claims={"sub": "123"},  
+            expires_delta=datetime.timedelta(minutes=5) 
+        )
         return jsonify({'token': token}), 200
     return jsonify({'message': 'Invalid credentials'}), 401
 
