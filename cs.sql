@@ -1,6 +1,13 @@
 CREATE DATABASE cs;
 USE cs;
 
+CREATE USER 'root'@'localhost' IDENTIFIED BY 'YES';
+ALTER USER 'username'@'localhost' IDENTIFIED BY 'YES';
+GRANT ALL PRIVILEGES ON cs.* TO 'username'@'localhost';
+FLUSH PRIVILEGES;
+
+GRANT ALL PRIVILEGES ON actual_database.* TO 'actual_username'@'localhost';
+FLUSH PRIVILEGES;
 CREATE TABLE Organizers (
     Organizer_ID INT PRIMARY KEY,
     Name VARCHAR(255),
