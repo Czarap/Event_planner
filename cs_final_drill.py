@@ -6,3 +6,12 @@ import datetime
 
 app = Flask(__name__)
 
+
+
+app.config['SQLALCHEMY_DATABASE_URI'] = 'https://github.com/Czarap/Event_planner'  
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['JWT_SECRET_KEY'] = 'czar'  
+
+db = SQLAlchemy(app)
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
