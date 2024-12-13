@@ -7,7 +7,6 @@ import datetime
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:YES@localhost:3306/cs'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['JWT_SECRET_KEY'] = 'czar'  
 
 db = SQLAlchemy(app)
@@ -52,13 +51,18 @@ class Event(db.Model):
     Number_of_Participants = db.Column(db.Integer)
     Event_Duration = db.Column(db.Integer)
     Potential_Cost = db.Column(db.Numeric(10, 2))
-
+#DB
 with app.app_context():
     db.create_all()
+
+
+#API REST Architecture conventions
+
 
 @app.route('/events', methods=['GET', 'POST'])
 @jwt_required()
 def handle_events():
+#READ
     if request.method == 'GET':
         events = db.session.query(
             Event.Event_ID,
@@ -81,7 +85,7 @@ def handle_events():
             'Event_Duration': event.Event_Duration,
             'Potential_Cost': str(event.Potential_Cost)
         } for event in events]), 200
-
+#CREATE
     elif request.method == 'POST':
         data = request.json
         new_event = Event(
@@ -104,7 +108,7 @@ def handle_events():
 @jwt_required()
 def handle_event(event_id):
     event = Event.query.get_or_404(event_id)
-
+#READ
     if request.method == 'GET':
         return jsonify({
             'Event_ID': event.Event_ID,
@@ -115,7 +119,7 @@ def handle_event(event_id):
             'Event_Duration': event.Event_Duration,
             'Potential_Cost': str(event.Potential_Cost)
         }), 200
-
+#Update
     elif request.method == 'PUT':
         data = request.json
         event.Event_Status_Code = data.get('Event_Status_Code', event.Event_Status_Code)
@@ -123,24 +127,21 @@ def handle_event(event_id):
         event.Organizer_ID = data.get('Organizer_ID', event.Organizer_ID)
         event.Venue_ID = data.get('Venue_ID', event.Venue_ID)
         event.Event_Name = data.get('Event_Name', event.Event_Name)
-
-    if 'Event_Start_Date' in data:
-        event.Event_Start_Date = datetime.datetime.strptime(data['Event_Start_Date'], '%Y-%m-%d').date()
-    if 'Event_End_Date' in data:
-        event.Event_End_Date = datetime.datetime.strptime(data['Event_End_Date'], '%Y-%m-%d').date()
-
         event.Number_of_Participants = data.get('Number_of_Participants', event.Number_of_Participants)
         event.Event_Duration = data.get('Event_Duration', event.Event_Duration)
         event.Potential_Cost = data.get('Potential_Cost', event.Potential_Cost)
         db.session.commit()
         return jsonify({'message': 'Event updated successfully!'}), 200
-
-
+#DELETE
     elif request.method == 'DELETE':
-        db.session.delete(event)
-        db.session.commit()
-        return jsonify({'message': 'Event deleted successfully!'}), 200
-
+        try:
+            db.session.delete(event)
+            db.session.commit()
+            return jsonify({'message': 'Event deleted successfully!'}), 200
+        except Exception as e:
+            print(f"Error deleting event: {str(e)}")
+            return jsonify({'message': 'Error deleting event', 'error': str(e)}), 500
+#JWT authentication
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -150,7 +151,7 @@ def login():
         token = create_access_token(
             identity=email,
             additional_claims={"sub": "123"},  
-            expires_delta=datetime.timedelta(minutes=5) 
+            expires_delta=datetime.timedelta(minutes=20) 
         )
         return jsonify({'token': token}), 200
     return jsonify({'message': 'Invalid credentials'}), 401
