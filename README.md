@@ -20,10 +20,12 @@ SECRET_KEY
 ## API Endpoints (markdown table)
 Endpoint				Method		Description
 =====================================
-http://127.0.0.1:5000/events	    GET			        List of the Events
-http://127.0.0.1:5000/login		POST		            Log in for  JWT authentication token
-												            log in details {
-											                "email": "admin@gmail.com",
-											                "password": "password"
+http://127.0.0.1:5000/events	        GET			        List of the Events
+http://127.0.0.1:5000/login		POST		           Log in for  JWT authentication token
+												       log in details {
+											          "email": "admin@gmail.com",
+											          "password": "password"
 												                    	}
-													
+http://127.0.0.1:5000/events/<int:event_id> GET         Retrieve data of the event_id
+http://127.0.0.1:5000/events/<int:event_id>  Delete     Delete data of the event_id
+http://127.0.0.1:5000/events/<int:event_id>     PUT     Updates existing data of the event_id
