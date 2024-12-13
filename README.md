@@ -5,16 +5,30 @@ The Event-Planner Data Model is designed to streamline the management of events 
 
 # Installation
 [DATABASE_URL]-(https://github.com/Czarap/Event_planner/blob/main/cs.sql)
-```cmd
-pip install -r requirements.txt
 
+
+## Installation
 ## Configuration
 Environment variables needed:
-	python -m pip install flask
-	python -m pip install flask_sqlalchemy
-	python -m pip install flask_jwt_extended
-    python -m pip install pytest
-
+1. Flask:
+    ```bash
+    python -m pip install flask
+    ```
+2. MySQL connector for Python:
+    ```bash
+    python -m pip install flask_sqlalchemy
+    ```
+3. Pytest:
+    ```bash
+    python -m pip install flask_jwt_extended
+    ```
+4. Flask-JWT-Extended for authentication :
+    ```bash
+     python -m pip install pytest
+5. Install dependencies from `requirements.txt`:
+    ```bash
+    pip install -r requirements.txt
+    ```
 SECRET_KEY
 
 ## API Endpoints (markdown table)
@@ -23,8 +37,10 @@ SECRET_KEY
 |---------------------------------------------  |--------|---------------------------------------------|
 | `http://127.0.0.1:5000/login`                 | POST   |  Log in for  JWT authentication token       |
 |										        |        |            log in details                   |
-|									            |	     |    { "email": "admin@gmail.com",            |
-|										        |	     |       "password": "password"}               |
+|									            |	     |    {                                        |
+|                                               |        |         "email": "admin@gmail.com",         |
+|										        |	     |       "password": "password"                |
+|                                               |        |                              }              |
 | `http://127.0.0.1:5000/events`                | GET    | List all flight schedules                   |
 | `http://127.0.0.1:5000/events`                | POST   |   Create a new data table                   |
 |                                               |        |   {                                         |
