@@ -1,5 +1,5 @@
 import unittest
-from cs_final_drill import app, db
+from cs_mock_db import app, db
 from sqlalchemy.sql import text
 
 
@@ -17,7 +17,6 @@ class FlaskAppTestCase(unittest.TestCase):
             db.session.execute(text("DELETE FROM ref_event_status"))
 
             db.session.commit()
-
 
             db.session.execute(
                 text("INSERT INTO ref_event_status (Event_Status_Code, Event_Status_Description) VALUES (1, 'Active')")
