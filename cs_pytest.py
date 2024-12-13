@@ -8,31 +8,32 @@ class FlaskAppTestCase(unittest.TestCase):
         app.config['TESTING'] = True
         app.config['JWT_SECRET_KEY'] = 'czar'
         self.client = app.test_client()
-        with app.app_context():
+    with app.app_context():
+        db.create_all()
 
-            db.session.execute(text("DELETE FROM events"))
-            db.session.execute(text("DELETE FROM venues"))
-            db.session.execute(text("DELETE FROM organizers"))
-            db.session.execute(text("DELETE FROM ref_event_types"))
-            db.session.execute(text("DELETE FROM ref_event_status"))
+        db.session.execute(text("DELETE FROM events"))
+        db.session.execute(text("DELETE FROM venues"))
+        db.session.execute(text("DELETE FROM organizers"))
+        db.session.execute(text("DELETE FROM ref_event_types"))
+        db.session.execute(text("DELETE FROM ref_event_status"))
 
-            db.session.commit()
+        db.session.commit()
 
+    
+        db.session.execute(
+            text("INSERT INTO ref_event_status (Event_Status_Code, Event_Status_Description) VALUES (1, 'Active')")
+        )
+        db.session.execute(
+            text("INSERT INTO ref_event_types (Event_Type_Code, Event_Type_Description) VALUES (1, 'Conference')")
+        )
+        db.session.execute(
+            text("INSERT INTO organizers (Organizer_ID, Name, Email_Address) VALUES (1, 'Organizer A', 'organizer@example.com')")
+        )
+        db.session.execute(
+            text("INSERT INTO venues (Venue_ID, Venue_Name, Other_Details) VALUES (1, 'Venue A', 'Details')")
+        )
 
-            db.session.execute(
-                text("INSERT INTO ref_event_status (Event_Status_Code, Event_Status_Description) VALUES (1, 'Active')")
-            )
-            db.session.execute(
-                text("INSERT INTO ref_event_types (Event_Type_Code, Event_Type_Description) VALUES (1, 'Conference')")
-            )
-            db.session.execute(
-                text("INSERT INTO organizers (Organizer_ID, Name, Email_Address) VALUES (1, 'Organizer A', 'organizer@example.com')")
-            )
-            db.session.execute(
-                text("INSERT INTO venues (Venue_ID, Venue_Name, Other_Details) VALUES (1, 'Venue A', 'Details')")
-            )
-
-            db.session.commit()
+        db.session.commit()
 
     def tearDown(self):
         with app.app_context():
