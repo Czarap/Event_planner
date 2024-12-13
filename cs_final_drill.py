@@ -118,8 +118,6 @@ def handle_event(event_id):
 
     elif request.method == 'PUT':
         data = request.json
-
-
         event.Event_Status_Code = data.get('Event_Status_Code', event.Event_Status_Code)
         event.Event_Type_Code = data.get('Event_Type_Code', event.Event_Type_Code)
         event.Organizer_ID = data.get('Organizer_ID', event.Organizer_ID)
