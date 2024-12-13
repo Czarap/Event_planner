@@ -23,7 +23,41 @@ class FlaskAppTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 401)
         self.assertEqual(response.get_json()['message'], 'Invalid credentials')
 
+    def test_get_tasks_empty(self):
+        token = self._get_token()
+        response = self.client.get('/tasks', headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), [])
 
+    def test_create_task(self):
+        token = self._get_token()
+        response = self.client.post('/tasks', json={'title': 'New Task'}, headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.get_json()['message'], 'Task created successfully!')
+
+    def test_update_task(self):
+        token = self._get_token()
+        self.client.post('/tasks', json={'title': 'Task to Update'}, headers={'Authorization': f'Bearer {token}'})
+        response = self.client.put('/tasks/1', json={'title': 'Updated Task', 'completed': True}, headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()['message'], 'Task updated successfully!')
+
+    def test_delete_task(self):
+        token = self._get_token()
+        self.client.post('/tasks', json={'title': 'Task to Delete'}, headers={'Authorization': f'Bearer {token}'})
+        response = self.client.delete('/tasks/1', headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json()['message'], 'Task deleted successfully!')
+
+    def test_task_not_found(self):
+        token = self._get_token()
+        response = self.client.put('/tasks/999', json={'title': 'Non-existent Task'}, headers={'Authorization': f'Bearer {token}'})
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.get_json()['message'], 'Task not found')
+
+    def _get_token(self):
+        response = self.client.post('/login', json={'email': 'admin@gmail.com', 'password': 'password'})
+        return response.get_json()['token']
 
 if __name__ == '__main__':
     unittest.main()
