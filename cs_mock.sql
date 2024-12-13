@@ -133,3 +133,31 @@ INSERT INTO Venues (Venue_ID, Venue_Name, Other_Details) VALUES
 (23, 'Mock Venue W', 'Airport hangar, versatile space'),
 (24, 'Mock Venue X', 'Library hall, capacity 120'),
 (25, 'Mock Venue Y', 'Casino lounge, capacity 550');
+
+
+INSERT INTO Events (Event_ID, Event_Status_Code, Event_Type_Code, Organizer_ID, Venue_ID, Event_Name, Event_Start_Date, Event_End_Date, Number_of_Participants, Event_Duration, Potential_Cost) VALUES
+(1, 1, 1, 1, 1, 'Virtual Meetup 2024', '2024-01-20', '2024-01-20', 400, 1, 20000.00),
+(2, 2, 2, 2, 2, 'Interactive Workshop', '2024-02-15', '2024-02-16', 60, 2, 6000.00),
+(3, 3, 3, 3, 3, 'Executive Marketing Seminar', '2024-03-10', '2024-03-10', 120, 1, 7000.00),
+(4, 4, 4, 4, 4, 'Webinar on AI', '2024-04-25', '2024-04-25', 250, 1, 3500.00),
+(5, 5, 5, 5, 5, 'Business Networking Event', '2024-05-05', '2024-05-05', 180, 1, 9000.00),
+(6, 1, 6, 6, 6, 'Annual Exhibition', '2024-06-20', '2024-06-22', 1200, 3, 60000.00),
+(7, 2, 7, 7, 7, 'Adventure Team Building', '2024-07-12', '2024-07-14', 40, 3, 3500.00),
+(8, 3, 8, 8, 8, 'Product Showcase 2024', '2024-08-18', '2024-08-18', 90, 1, 4500.00),
+(9, 4, 9, 9, 9, 'Panel Series Discussion', '2024-09-10', '2024-09-12', 300, 3, 11000.00),
+(10, 5, 10, 10, 10, 'Career Expo 2024', '2024-10-15', '2024-10-15', 450, 1, 25000.00),
+(11, 1, 11, 11, 11, 'National Hackathon', '2024-10-20', '2024-10-21', 160, 2, 15000.00),
+(12, 2, 12, 12, 12, 'Leadership Summit', '2024-11-10', '2024-11-10', 50, 1, 6500.00),
+(13, 3, 13, 13, 13, 'Community Social Event', '2024-12-12', '2024-12-12', 600, 1, 2500.00),
+(14, 4, 14, 14, 14, 'Charity Gala Night', '2025-01-25', '2025-01-25', 320, 1, 16000.00),
+(15, 5, 15, 15, 15, 'Cultural Art Showcase', '2025-02-10', '2025-02-12', 750, 3, 12000.00),
+(16, 1, 16, 16, 16, 'Book Launch 2025', '2025-03-15', '2025-03-15', 260, 1, 8500.00),
+(17, 2, 17, 17, 17, 'Inter-school Sports Meet', '2025-04-20', '2025-04-22', 1050, 3, 22000.00),
+(18, 3, 18, 18, 18, 'Science Fair 2025', '2025-05-15', '2025-05-17', 550, 3, 16000.00),
+(19, 4, 19, 19, 19, 'Film Screening 2025', '2025-06-20', '2025-06-20', 220, 1, 4000.00),
+(20, 5, 20, 20, 20, 'Music and Arts Festival', '2025-07-10', '2025-07-12', 850, 3, 27000.00),
+(21, 1, 21, 21, 21, 'Live Music Night', '2025-08-20', '2025-08-20', 1100, 1, 52000.00),
+(22, 2, 22, 22, 22, 'Dance Fest 2025', '2025-09-10', '2025-09-10', 420, 1, 16000.00),
+(23, 3, 23, 23, 23, 'Theatrical Play Showcase', '2025-10-15', '2025-10-15', 360, 1, 13000.00),
+(24, 4, 24, 24, 24, 'Quiz Bowl Nationals', '2025-11-25', '2025-11-25', 520, 1, 7000.00),
+(25, 5, 25, 25, 25, 'University Debate 2025', '2025-12-10', '2025-12-10', 330, 1, 8000.00);
