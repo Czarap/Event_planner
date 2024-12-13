@@ -4,6 +4,7 @@
 The Event-Planner Data Model is designed to streamline the management of events by providing a structured framework for organizing information about organizers, venues, events, participants, and resources. It supports event planners in coordinating  tracking details, and ensuring smooth execution of events
 
 # Installation
+[DATABASE_URL]-(https://github.com/Czarap/Event_planner/blob/main/cs.sql)
 ```cmd
 pip install -r requirements.txt
 
@@ -14,7 +15,6 @@ Environment variables needed:
 	python -m pip install flask_jwt_extended
     python -m pip install pytest
 
-[DATABASE_URL]-(https://github.com/Czarap/Event_planner/blob/main/cs.sql)
 SECRET_KEY
 
 ## API Endpoints (markdown table)
