@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
 import datetime
 
+
 app = Flask(__name__)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:YES@localhost:3306/cs'
@@ -117,18 +118,25 @@ def handle_event(event_id):
 
     elif request.method == 'PUT':
         data = request.json
+
+
         event.Event_Status_Code = data.get('Event_Status_Code', event.Event_Status_Code)
         event.Event_Type_Code = data.get('Event_Type_Code', event.Event_Type_Code)
         event.Organizer_ID = data.get('Organizer_ID', event.Organizer_ID)
         event.Venue_ID = data.get('Venue_ID', event.Venue_ID)
         event.Event_Name = data.get('Event_Name', event.Event_Name)
+
+    if 'Event_Start_Date' in data:
         event.Event_Start_Date = datetime.datetime.strptime(data['Event_Start_Date'], '%Y-%m-%d').date()
+    if 'Event_End_Date' in data:
         event.Event_End_Date = datetime.datetime.strptime(data['Event_End_Date'], '%Y-%m-%d').date()
+
         event.Number_of_Participants = data.get('Number_of_Participants', event.Number_of_Participants)
         event.Event_Duration = data.get('Event_Duration', event.Event_Duration)
         event.Potential_Cost = data.get('Potential_Cost', event.Potential_Cost)
         db.session.commit()
         return jsonify({'message': 'Event updated successfully!'}), 200
+
 
     elif request.method == 'DELETE':
         db.session.delete(event)
