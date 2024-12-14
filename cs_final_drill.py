@@ -1,147 +1,144 @@
 from flask import Flask, request, jsonify
-from flask_sqlalchemy import SQLAlchemy
+from flask_mysqldb import MySQL
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required
+import MySQLdb
+import MySQLdb.cursors
 import datetime
-
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://username:YES@localhost:3306/cs'
-app.config['JWT_SECRET_KEY'] = 'czar'  
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'username'
+app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_DB'] = 'cs'
+app.config['JWT_SECRET_KEY'] = 'czar'
 
-db = SQLAlchemy(app)
+mysql = MySQL(app)
 jwt = JWTManager(app)
 
-class Venue(db.Model):
-    __tablename__ = 'venues'
-    Venue_ID = db.Column(db.Integer, primary_key=True)
-    Venue_Name = db.Column(db.String(255), nullable=False)
-    Other_Details = db.Column(db.Text)
-
-class Organizer(db.Model):
-    __tablename__ = 'organizers'
-    Organizer_ID = db.Column(db.Integer, primary_key=True)
-    Name = db.Column(db.String(255), nullable=False)
-    Email_Address = db.Column(db.String(255), nullable=False, unique=True)
-    Contact_ID = db.Column(db.Integer)
-    Address_ID = db.Column(db.Integer)
-    Web_Site_Address = db.Column(db.String(255))
-    Mobile_Number = db.Column(db.String(20))
-
-class RefEventStatus(db.Model):
-    __tablename__ = 'ref_event_status'
-    Event_Status_Code = db.Column(db.Integer, primary_key=True)
-    Event_Status_Description = db.Column(db.String(255), nullable=False)
-
-class RefEventType(db.Model):
-    __tablename__ = 'ref_event_types'
-    Event_Type_Code = db.Column(db.Integer, primary_key=True)
-    Event_Type_Description = db.Column(db.String(255), nullable=False)
-
-class Event(db.Model):
-    __tablename__ = 'events'
-    Event_ID = db.Column(db.Integer, primary_key=True)
-    Event_Status_Code = db.Column(db.Integer, db.ForeignKey('ref_event_status.Event_Status_Code'))
-    Event_Type_Code = db.Column(db.Integer, db.ForeignKey('ref_event_types.Event_Type_Code'))
-    Organizer_ID = db.Column(db.Integer, db.ForeignKey('organizers.Organizer_ID'))
-    Venue_ID = db.Column(db.Integer, db.ForeignKey('venues.Venue_ID'))
-    Event_Name = db.Column(db.String(255), nullable=False)
-    Event_Start_Date = db.Column(db.Date, nullable=False)
-    Event_End_Date = db.Column(db.Date, nullable=False)
-    Number_of_Participants = db.Column(db.Integer)
-    Event_Duration = db.Column(db.Integer)
-    Potential_Cost = db.Column(db.Numeric(10, 2))
-#DB
-with app.app_context():
-    db.create_all()
-
-
-#API REST Architecture conventions
-
-
+# API: 
 @app.route('/events', methods=['GET', 'POST'])
 @jwt_required()
 def handle_events():
-#READ
-    if request.method == 'GET':
-        events = db.session.query(
-            Event.Event_ID,
-            Event.Event_Name,
-            Event.Event_Start_Date,
-            Event.Event_End_Date,
-            Event.Number_of_Participants,
-            RefEventStatus.Event_Status_Description.label('Event_Duration'),
-            Event.Potential_Cost
-        ).join(
-            RefEventStatus, Event.Event_Status_Code == RefEventStatus.Event_Status_Code
-        ).order_by(Event.Event_ID.asc()).all()
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 
-        return jsonify([{
-            'Event_ID': event.Event_ID,
-            'Event_Name': event.Event_Name,
-            'Event_Start_Date': event.Event_Start_Date.strftime('%Y-%m-%d'),
-            'Event_End_Date': event.Event_End_Date.strftime('%Y-%m-%d'),
-            'Number_of_Participants': event.Number_of_Participants,
-            'Event_Duration': event.Event_Duration,
-            'Potential_Cost': str(event.Potential_Cost)
-        } for event in events]), 200
-#CREATE
-    elif request.method == 'POST':
-        data = request.json
-        new_event = Event(
-            Event_Status_Code=data['Event_Status_Code'],
-            Event_Type_Code=data['Event_Type_Code'],
-            Organizer_ID=data['Organizer_ID'],
-            Venue_ID=data['Venue_ID'],
-            Event_Name=data['Event_Name'],
-            Event_Start_Date=datetime.datetime.strptime(data['Event_Start_Date'], '%Y-%m-%d').date(),
-            Event_End_Date=datetime.datetime.strptime(data['Event_End_Date'], '%Y-%m-%d').date(),
-            Number_of_Participants=data['Number_of_Participants'],
-            Event_Duration=data['Event_Duration'],
-            Potential_Cost=data['Potential_Cost']
-        )
-        db.session.add(new_event)
-        db.session.commit()
-        return jsonify({'message': 'Event created successfully!'}), 201
+        if request.method == 'GET':  # READ
+            cursor.execute("""
+                SELECT e.Event_ID, e.Event_Name, e.Event_Start_Date, e.Event_End_Date, e.Number_of_Participants, 
+                       r.Event_Status_Description, e.Potential_Cost
+                FROM events e
+                JOIN ref_event_status r ON e.Event_Status_Code = r.Event_Status_Code
+                ORDER BY e.Event_ID ASC
+            """)
+            events = cursor.fetchall()
 
+
+            if not events:
+                return jsonify({'message': 'No events found'}), 404
+
+
+            result = [{
+                'Event_ID': event['Event_ID'],
+                'Event_Name': event['Event_Name'],
+                'Event_Start_Date': event['Event_Start_Date'].strftime('%Y-%m-%d') if event['Event_Start_Date'] else None,
+                'Event_End_Date': event['Event_End_Date'].strftime('%Y-%m-%d') if event['Event_End_Date'] else None,
+                'Number_of_Participants': event['Number_of_Participants'],
+                'Event_Duration': event['Event_Status_Description'],
+                'Potential_Cost': str(event['Potential_Cost'])
+            } for event in events]
+
+            return jsonify(result), 200
+
+        elif request.method == 'POST':  # CREATE
+            data = request.json
+            try:
+                cursor.execute("""
+                    INSERT INTO events (
+                        Event_Status_Code, Event_Type_Code, Organizer_ID, Venue_ID, Event_Name, Event_Start_Date, 
+                        Event_End_Date, Number_of_Participants, Event_Duration, Potential_Cost
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    data['Event_Status_Code'], data['Event_Type_Code'], data['Organizer_ID'], data['Venue_ID'],
+                    data['Event_Name'], data['Event_Start_Date'], data['Event_End_Date'],
+                    data['Number_of_Participants'], data['Event_Duration'], data['Potential_Cost']
+                ))
+                mysql.connection.commit()
+                return jsonify({'message': 'Event created successfully!'}), 201
+            except Exception as e:
+                mysql.connection.rollback()
+                app.logger.error(f"Error creating event: {e}")
+                return jsonify({'message': 'Error creating event', 'error': str(e)}), 500
+
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {e}")
+        return jsonify({'message': 'Internal Server Error', 'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+
+#API REST ARCHI
 @app.route('/events/<int:event_id>', methods=['GET', 'PUT', 'DELETE'])
 @jwt_required()
 def handle_event(event_id):
-    event = Event.query.get_or_404(event_id)
+    try:
+        cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
 #READ
-    if request.method == 'GET':
-        return jsonify({
-            'Event_ID': event.Event_ID,
-            'Event_Name': event.Event_Name,
-            'Event_Start_Date': event.Event_Start_Date.strftime('%Y-%m-%d'),
-            'Event_End_Date': event.Event_End_Date.strftime('%Y-%m-%d'),
-            'Number_of_Participants': event.Number_of_Participants,
-            'Event_Duration': event.Event_Duration,
-            'Potential_Cost': str(event.Potential_Cost)
-        }), 200
-#Update
-    elif request.method == 'PUT':
-        data = request.json
-        event.Event_Status_Code = data.get('Event_Status_Code', event.Event_Status_Code)
-        event.Event_Type_Code = data.get('Event_Type_Code', event.Event_Type_Code)
-        event.Organizer_ID = data.get('Organizer_ID', event.Organizer_ID)
-        event.Venue_ID = data.get('Venue_ID', event.Venue_ID)
-        event.Event_Name = data.get('Event_Name', event.Event_Name)
-        event.Number_of_Participants = data.get('Number_of_Participants', event.Number_of_Participants)
-        event.Event_Duration = data.get('Event_Duration', event.Event_Duration)
-        event.Potential_Cost = data.get('Potential_Cost', event.Potential_Cost)
-        db.session.commit()
-        return jsonify({'message': 'Event updated successfully!'}), 200
+        if request.method == 'GET':  
+            cursor.execute("SELECT * FROM events WHERE Event_ID = %s", (event_id,))
+            event = cursor.fetchone()
+
+            if not event:
+                return jsonify({'message': 'Event not found'}), 404
+
+            return jsonify({
+                'Event_ID': event['Event_ID'],
+                'Event_Name': event['Event_Name'],
+                'Event_Start_Date': event['Event_Start_Date'].strftime('%Y-%m-%d') if event['Event_Start_Date'] else None,
+                'Event_End_Date': event['Event_End_Date'].strftime('%Y-%m-%d') if event['Event_End_Date'] else None,
+                'Number_of_Participants': event['Number_of_Participants'],
+                'Event_Duration': event['Event_Duration'],
+                'Potential_Cost': str(event['Potential_Cost'])
+            }), 200
+#UPDATE
+        elif request.method == 'PUT':  
+            data = request.json
+            try:
+                cursor.execute("""
+                    UPDATE events
+                    SET Event_Status_Code = %s, Event_Type_Code = %s, Organizer_ID = %s, Venue_ID = %s,
+                        Event_Name = %s, Number_of_Participants = %s, Event_Duration = %s, Potential_Cost = %s
+                    WHERE Event_ID = %s
+                """, (
+                    data.get('Event_Status_Code'), data.get('Event_Type_Code'), data.get('Organizer_ID'),
+                    data.get('Venue_ID'), data.get('Event_Name'), data.get('Number_of_Participants'),
+                    data.get('Event_Duration'), data.get('Potential_Cost'), event_id
+                ))
+                mysql.connection.commit()
+                return jsonify({'message': 'Event updated successfully!'}), 200
+            except Exception as e:
+                mysql.connection.rollback()
+                app.logger.error(f"Error updating event: {e}")
+                return jsonify({'message': 'Error updating event', 'error': str(e)}), 500
 #DELETE
-    elif request.method == 'DELETE':
-        try:
-            db.session.delete(event)
-            db.session.commit()
-            return jsonify({'message': 'Event deleted successfully!'}), 200
-        except Exception as e:
-            print(f"Error deleting event: {str(e)}")
-            return jsonify({'message': 'Error deleting event', 'error': str(e)}), 500
-#JWT authentication
+        elif request.method == 'DELETE':  
+            try:
+                cursor.execute("DELETE FROM events WHERE Event_ID = %s", (event_id,))
+                mysql.connection.commit()
+                return jsonify({'message': 'Event deleted successfully!'}), 200
+            except Exception as e:
+                mysql.connection.rollback()
+                app.logger.error(f"Error deleting event: {e}")
+                return jsonify({'message': 'Error deleting event', 'error': str(e)}), 500
+
+    except Exception as e:
+        app.logger.error(f"Unexpected error: {e}")
+        return jsonify({'message': 'Internal Server Error', 'error': str(e)}), 500
+
+    finally:
+        cursor.close()
+
+# LOGIN jwt authentication
 @app.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -150,8 +147,8 @@ def login():
     if email == 'admin@gmail.com' and data['password'] == 'password':
         token = create_access_token(
             identity=email,
-            additional_claims={"sub": "123"},  
-            expires_delta=datetime.timedelta(minutes=20) 
+            additional_claims={"sub": "123"},
+            expires_delta=datetime.timedelta(minutes=20)
         )
         return jsonify({'token': token}), 200
     return jsonify({'message': 'Invalid credentials'}), 401
