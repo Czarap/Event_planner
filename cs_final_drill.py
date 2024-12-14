@@ -6,12 +6,19 @@ import MySQLdb.cursors
 import datetime
 
 app = Flask(__name__)
-
-app.config['MYSQL_HOST'] = 'localhost'
-app.config['MYSQL_USER'] = 'username'
-app.config['MYSQL_PASSWORD'] = 'root'
-app.config['MYSQL_DB'] = 'cs'
+#for pythonaynwhere
+app.config['MYSQL_HOST'] = 'sizar.mysql.pythonanywhere-services.com'
+app.config['MYSQL_USER'] = 'sizar'
+app.config['MYSQL_PASSWORD'] = 'mysqlroot'
+app.config['MYSQL_DB'] = 'sizar$default'
 app.config['JWT_SECRET_KEY'] = 'czar'
+
+# for localhost 
+# app.config['MYSQL_HOST'] = 'localhost'
+# app.config['MYSQL_USER'] = 'username'
+# app.config['MYSQL_PASSWORD'] = 'root'
+# app.config['MYSQL_DB'] = 'cs'
+# app.config['JWT_SECRET_KEY'] = 'czar'
 
 mysql = MySQL(app)
 jwt = JWTManager(app)
@@ -22,8 +29,8 @@ jwt = JWTManager(app)
 def handle_events():
     try:
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-
-        if request.method == 'GET':  # READ
+#READ
+        if request.method == 'GET':  
             cursor.execute("""
                 SELECT e.Event_ID, e.Event_Name, e.Event_Start_Date, e.Event_End_Date, e.Number_of_Participants, 
                        r.Event_Status_Description, e.Potential_Cost
