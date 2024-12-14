@@ -4,6 +4,8 @@ The Event-Planner Data Model is designed to streamline the management of events 
 
 # Installation
 [DATABASE_URL]-(https://github.com/Czarap/Event_planner/blob/main/cs.sql),
+
+
 [SECRET_KEY] - app.config['JWT_SECRET_KEY'] = 'czar'  
 
 
@@ -26,19 +28,22 @@ Environment variables needed:
 5. Install dependencies from `requirements.txt`:
     ```bash
     pip install -r requirements.txt
-    ```
+6. Mysqldb
+    ```bash
+     python -m pip install flask_mysqldb
+    ```bash
 
 ## API Endpoints (markdown table)
 | Endpoint                                      | Method |                 Description                 |
 |---------------------------------------------  |--------|---------------------------------------------|
-| `http://127.0.0.1:5000/login`                 | POST   |  Log in for  JWT authentication token       |
+| `api/login`                                   | POST   |  Log in for  JWT authentication token       |
 |										        |        |            log in details                   |
 |									            |	     |    {                                        |
 |                                               |        |         "email": "admin@gmail.com",         |
 |										        |	     |       "password": "password"                |
 |                                               |        |                              }              |
-| `http://127.0.0.1:5000/events`                | GET    | List all flight schedules                   |
-| `http://127.0.0.1:5000/events`                | POST   |   Create a new data table                   |
+| `api/events`                                  | GET    | List all flight schedules                   |
+| `api/events`                                  | POST   |   Create a new data table                   |
 |                                               |        |         Example Template                    |
 |                                               |        |   {                                         |
 |                                               |        |      "Event_Status_Code": 1,                |
@@ -52,8 +57,8 @@ Environment variables needed:
 |                                               |        |        "Event_Duration": 3,                 |
 |                                               |        |        "Potential_Cost": 15000.00           |
 |                                               |        |        }                                    |
-| `http://127.0.0.1:5000/events/<int:event_id>` | GET    | Retrieve the specifc data of the event_id   |
-| `http://127.0.0.1:5000/events/<int:event_id>` | PUT    |  Updates existing data of the event_id      |
+| `api/events/<int:event_id>`                   | GET    | Retrieve the specifc data of the event_id   |
+| `api/events/<int:event_id>`                   | PUT    |  Updates existing data of the event_id      |
 |                                               |        |            Example Template                 |
 |                                               |        | {                                           |       
 |                                               |        |       "Event_Status_Code": 2,               |
@@ -63,4 +68,4 @@ Environment variables needed:
 |                                               |        |        "Number_of_Participants": 250,       |
 |                                               |        |        "Potential_Cost": 18000.00           |
 |                                               |        |                                    }        |
-| `http://127.0.0.1:5000/events/<int:event_id>` | DELETE | Delete the specific data of the event_id    |
+| `api/events/<int:event_id>`                   | DELETE | Delete the specific data of the event_id    |
