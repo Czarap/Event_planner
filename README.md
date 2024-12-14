@@ -31,7 +31,6 @@ Environment variables needed:
 6. Mysqldb
     ```bash
      python -m pip install flask_mysqldb
-    ```bash
 
 ## API Endpoints (markdown table)
 | Endpoint                                      | Method |                 Description                 |
